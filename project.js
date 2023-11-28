@@ -19,7 +19,7 @@ const loadDAta = async (id) => {
     showEmpty();
   }
 };
-// async function
+
 
 const loadCategories = async (id) => {
   activeId = id;
@@ -31,16 +31,15 @@ const loadCategories = async (id) => {
   }
   const categoryContainer = document.getElementById("categories-ul");
   categoryContainer.innerHTML = "";
-  console.log(id);
   categories?.forEach((category) => {
-    console.log(category);
+    
     const div = document.createElement("div");
     div.innerHTML = `
     <li  
     id = ${category.category_id}
     onclick="loadCategories(${category.category_id})"
-    class="divide-y divide-dashed rounded-md">
-              <span class="sm:px-4 px-2.5 py-2 ">${category.category}</span>
+    class="">
+              <button class="btn btn-secondary">${category.category}</button>
             </li>`;
     categoryContainer.appendChild(div);
   });
@@ -131,7 +130,6 @@ const showVideos = (videos) => {
 loadCategories("1000");
 
 
-// extra
 function formatTime(seconds) {
     if (seconds < 60) {
       return `${seconds} seconds ago`;
