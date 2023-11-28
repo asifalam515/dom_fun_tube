@@ -10,8 +10,29 @@ const loadCategories =(id)=>{
         .then(res=>res.json())
         .then(data=>showAll(data.data))
     }
+    
  
 }
+
+// empty
+const showEmpty=()=>{
+  const videoContainer=document.getElementById("video-container")
+  videoContainer.innerHTML="";
+  const emptyContainer = document.getElementById("empty");
+  const div = document.createElement("div");
+  div.innerHTML = `  <div class="d-flex justify-content-center m-5">
+  <img src="./images/Icon.png" class="img-fluid" alt="" />
+  <h2
+    class="mt-8  text-center  mx-auto"
+  >
+    Oops!! Sorry, There is no content here
+  </h2>
+</div>`;
+  emptyContainer.appendChild(div);
+}
+
+
+
 
 const showAll=(data)=>{
     const categories=document.getElementById("category")
@@ -35,26 +56,34 @@ const handleButtonClick=(categoryId)=>{
 const fatchByCategory=(id)=>{
     fetch(`https://openapi.programming-hero.com/api/videos/category/${id}`)
     .then(res=>res.json())
-    .then(data=>showCategoryWiseData(data.data))
+    .then(data=> showCategoryWiseData(data.data))
 }
 
 
 
 
 const showCategoryWiseData=(data)=>{
-console.log(data);
-data.forEach((singleData)=>{
-    // console.log(singleData);
-})
+console.log(data.length);
+if(data.length ==0 )
+{
+  document.getElementById("empty").classList.remove("d-none")
+    showEmpty()
+   
+  
+}
+else
+{
+// hide the empty
+document.getElementById("empty").classList.add("d-none")
 
-const videoContainer = document.getElementById("video-container");
+  const videoContainer = document.getElementById("video-container");
 videoContainer.innerHTML = "";
 data?.forEach((video) =>{
     const div=document.createElement("div")
     div.classList.add("col-3","m-2","text-center")
     div.innerHTML=`
   <div class="container m-2">
-  <div class="card style="width: 18rem;"">
+  <div class="card" style="width: 18rem">
 
   <div class="img" >
   <img src="${video.thumbnail}" class="card-img-top" alt="...">
@@ -84,11 +113,33 @@ data?.forEach((video) =>{
 
     `
     videoContainer.appendChild(div)
-})
+}
+
+)
+}
+
+
+
+
+
 
 }
 
 
+const handleSort = () => {
+  isAscending = !isAscending;
+  if (!isAscending) {
+    document
+      .getElementById("sort-container")
+      .setAttribute("data-tip", "Highest to Lowest");
+  } else {
+    document
+      .getElementById("sort-container")
+      .setAttribute("data-tip", "Lowest to Highest");
+  }
+  const sortedVideo = sortViews(videos, isAscending);
+  showVideos(sortedVideo);
+};
 
 
 loadCategories()
@@ -125,5 +176,21 @@ function formatTime(seconds) {
       }
     });
     return sortedData;
+  }
+
+  async function fetchData(url) {
+    try {
+      const response = await fetch(url);
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("An error occurred:", error);
+      return null;
+    }
   }
   
