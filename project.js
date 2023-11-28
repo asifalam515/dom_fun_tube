@@ -1,131 +1,67 @@
-let videos=[]
-let categories=[]
-let isAscending=false;
+let videos = [];
+let categories = [];
+let isAscending = false;
+const loadDAta = async (id) => {
+  document.getElementById("spinner").classList.remove("hidden");
+  const emptyContainer = document.getElementById("empty");
+  emptyContainer.innerHTML = "";
+  const data = await fetchData(
+    `https://openapi.programming-hero.com/api/videos/category/${id}`
+  );
+  videos = data.data;
+  document.getElementById("spinner").classList.add("hidden");
+  if (videos.length > 0) {
+    document.getElementById("sort-by").classList.remove("hidden");
+    showVideos(videos);
+  } else {
+    document.getElementById("sort-by").classList.add("hidden");
+    emptyContainer;
+    showEmpty();
+  }
+};
+// async function
 
-const loadCategories =(id)=>{
-    activeId=id
-    if(categories.length == 0)
-    {
-        fetch(' https://openapi.programming-hero.com/api/videos/categories')
-        .then(res=>res.json())
-        .then(data=>showAll(data.data))
-    }
-    
- 
-}
+const loadCategories = async (id) => {
+  activeId = id;
+  if (categories.length == 0) {
+    const data = await fetchData(
+      "https://openapi.programming-hero.com/api/videos/categories"
+    );
+    categories = data.data;
+  }
+  const categoryContainer = document.getElementById("categories-ul");
+  categoryContainer.innerHTML = "";
+  console.log(id);
+  categories?.forEach((category) => {
+    console.log(category);
+    const div = document.createElement("div");
+    div.innerHTML = `
+    <li  
+    id = ${category.category_id}
+    onclick="loadCategories(${category.category_id})"
+    class="divide-y divide-dashed rounded-md">
+              <span class="sm:px-4 px-2.5 py-2 ">${category.category}</span>
+            </li>`;
+    categoryContainer.appendChild(div);
+  });
+  loadDAta(id);
+};
 
-// empty
-const showEmpty=()=>{
-  const videoContainer=document.getElementById("video-container")
-  videoContainer.innerHTML="";
+const showEmpty = () => {
+  const videoContainer = document.getElementById("video-container");
+  videoContainer.innerHTML = "";
   const emptyContainer = document.getElementById("empty");
   const div = document.createElement("div");
-  div.innerHTML = `  <div class="d-flex justify-content-center m-5">
-  <img src="./images/Icon.png" class="img-fluid" alt="" />
+  div.innerHTML = `  <div class="flex flex-col mt-20 items-center justify-center">
+  <img src="./images/Icon.png" class="h-[140px] w-[140px]" alt="" />
   <h2
-    class="mt-8  text-center  mx-auto"
+    class="mt-8 text-3xl text-center font-bold md:w-[400px] w-[80%] mx-auto"
   >
     Oops!! Sorry, There is no content here
   </h2>
 </div>`;
   emptyContainer.appendChild(div);
-}
-
-
-
-
-const showAll=(data)=>{
-    const categories=document.getElementById("category")
-
-data.forEach((singleData)=>{
-    // console.log(singleData);
-    const btn=document.createElement('button')
-    btn.innerText=`${singleData.category}`
-    btn.classList.add("btn", "btn-secondary")
-    btn.addEventListener('click', () => handleButtonClick(singleData.category_id));
-
-    categories.appendChild(btn)
-})
-}
-const handleButtonClick=(categoryId)=>{
-    // console.log('clicked button with the category id:',categoryId);
-     fatchByCategory(categoryId)
-}
-
-
-const fatchByCategory=(id)=>{
-    fetch(`https://openapi.programming-hero.com/api/videos/category/${id}`)
-    .then(res=>res.json())
-    .then(data=> showCategoryWiseData(data.data))
-}
-
-
-
-
-const showCategoryWiseData=(data)=>{
-console.log(data.length);
-if(data.length ==0 )
-{
-  document.getElementById("empty").classList.remove("d-none")
-    showEmpty()
-   
-  
-}
-else
-{
-// hide the empty
-document.getElementById("empty").classList.add("d-none")
-
-  const videoContainer = document.getElementById("video-container");
-videoContainer.innerHTML = "";
-data?.forEach((video) =>{
-    const div=document.createElement("div")
-    div.classList.add("col-3","m-2","text-center")
-    div.innerHTML=`
-  <div class="container m-2">
-  <div class="card" style="width: 18rem">
-
-  <div class="img" >
-  <img src="${video.thumbnail}" class="card-img-top" alt="...">
-  </div>
-
-
-<div class="d-flex justify-content-start">
-<span class="w-100"> <img class="w-25 rounded-5 img-fluid" src=${video?.authors[0].profile_picture} /></span>
-<h6 class="card-text"> ${video.title}</h6> 
-</div>
-
-  <div class="name-verification d-flex gap-2 justify-content-center">
-  <p class="">${video?.authors[0].profile_name}</p>
-  <span>${
-    video?.authors[0].verified
-      ? '<img class="img-fluid" src="./images/icons8-verified-30.png" alt="" />'
-      : ""
-  }
-  </span>
-  </div>
-
-
-  
-  </div>
-  
-  </div>
-
-    `
-    videoContainer.appendChild(div)
-}
-
-)
-}
-
-
-
-
-
-
-}
-
-
+};
 const handleSort = () => {
   isAscending = !isAscending;
   if (!isAscending) {
@@ -140,10 +76,59 @@ const handleSort = () => {
   const sortedVideo = sortViews(videos, isAscending);
   showVideos(sortedVideo);
 };
+const showVideos = (videos) => {
+  const videoContainer = document.getElementById("video-container");
+  videoContainer.innerHTML = "";
+  videos?.forEach((video) => {
+    const div = document.createElement("div");
+    div.innerHTML = ` <div
+    class="h-fit rounded-lg"
+  >
+  <figure class="w-full min-h-[100px] h-full   sm:h-[200px] relative">
+  <img
+    src="${video.thumbnail}"
+    class="h-full w-full rounded-md"
+    alt="product"
+  />
+  <div
+    class="absolute bottom-3 right-3 text-white text-xs bg-[#171717] p-0.5 rounded-md"
+  >
+  <span> ${
+    video?.others?.posted_date && formatTime(video?.others?.posted_date)
+  }</span>
+  </div>
+</figure>
+    <div class="flex gap-3 mt-5">
+      <div class="w-fit mt-0.5">
+        <div class="avatar">
+          <div class="w-10  rounded-full">
+            <img src=${video?.authors[0].profile_picture} />
+          </div>
+        </div>
+      </div>
+      <div class="flex-1">
+        <h3
+          class="text-neutral-950 max-w-prose line-clamp-2 font-bold text-base "
+        >
+        ${video.title}
+        </h3>
+        <div class="flex gap-2  mt-2 mb-2 items-center">
+          <p class="text-sm text-heroText">${video?.authors[0].profile_name}</p>
+         ${
+           video?.authors[0].verified
+             ? '<img src="./images/icons8-verified-30.png" alt="" />'
+             : ""
+         }
+        </div>
+        <p class="text-sm mt-2 text-heroText">${video?.others?.views} views</p>
+      </div>
+    </div>
+  </div>`;
+    videoContainer.appendChild(div);
+  });
+};
 
-
-loadCategories()
-
+loadCategories("1000");
 
 
 // extra
